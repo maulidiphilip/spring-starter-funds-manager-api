@@ -19,4 +19,15 @@ public class ProfileController {
         ProfileDTO registeredProfile = profileService.registerProfile(profileDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredProfile);
     }
+
+    @GetMapping("/activate")
+    public ResponseEntity<String> activateProfile(@RequestParam("activationToken") String activationToken) {
+        boolean isActivated = profileService.activateProfile(activationToken);
+        if (isActivated) {
+            return ResponseEntity.status(HttpStatus.OK).body("Profile Activated Successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile Activation Not Found");
+        }
+    }
+
 }
