@@ -1,15 +1,20 @@
 package mw.maulidi.money_manager_springboot_starter_api.service;
 
 import lombok.RequiredArgsConstructor;
+import mw.maulidi.money_manager_springboot_starter_api.dto.AuthDTO;
 import mw.maulidi.money_manager_springboot_starter_api.dto.ProfileDTO;
 import mw.maulidi.money_manager_springboot_starter_api.entity.ProfileEntity;
 import mw.maulidi.money_manager_springboot_starter_api.repository.ProfileRepository;
+import mw.maulidi.money_manager_springboot_starter_api.utils.JwtUtil;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -28,6 +33,8 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager  authenticationManager;
+    private final JwtUtil jwtUtil;
 
     /**
      * Registers a new profile, encodes the password, generates an activation token,
@@ -151,5 +158,19 @@ public class ProfileService {
                 .createdAt(currentUser.getCreatedAt())
                 .updatedAt(currentUser.getUpdatedAt())
                 .build();
+    }
+
+    public Map<String, Object> auntenticateUserAndGenerateToken(AuthDTO authDTO) {
+        try{
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(), authDTO.getPassword())); // here i just authenticate theb user
+            // i have to genereate the token from JWT
+            String token = jwtUtil.generateToken(authDTO.getEmail());
+            return Map.of(
+                    "token", token,
+                    "user", getPublicProfile(authDTO.getEmail())
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid email and password");
+        }
     }
 }

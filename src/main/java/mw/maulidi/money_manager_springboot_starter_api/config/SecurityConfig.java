@@ -1,8 +1,12 @@
 package mw.maulidi.money_manager_springboot_starter_api.config;
 
 import lombok.RequiredArgsConstructor;
+import mw.maulidi.money_manager_springboot_starter_api.service.AppUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,6 +30,8 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    public final AppUserDetailsService appUserDetailsService;
 
     /**
      * Configures the main Spring Security filter chain.
@@ -89,5 +96,13 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration); // Apply to all endpoints
 
         return source;
+    }
+
+    @Bean
+    public AuthenticationManager  authenticationManagerBean() throws Exception {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(appUserDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        return new ProviderManager(Arrays.asList(daoAuthenticationProvider));
     }
 }
