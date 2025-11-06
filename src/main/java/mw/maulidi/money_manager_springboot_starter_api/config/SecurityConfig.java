@@ -1,6 +1,7 @@
 package mw.maulidi.money_manager_springboot_starter_api.config;
 
 import lombok.RequiredArgsConstructor;
+import mw.maulidi.money_manager_springboot_starter_api.security.JWTRequestFilter;
 import mw.maulidi.money_manager_springboot_starter_api.service.AppUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,6 +34,7 @@ import java.util.List;
 public class SecurityConfig {
 
     public final AppUserDetailsService appUserDetailsService;
+    public final JWTRequestFilter  jwtRequestFilter;
 
     /**
      * Configures the main Spring Security filter chain.
@@ -60,7 +63,8 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // here No sessions — JWT or token-based
-                );
+                )
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
